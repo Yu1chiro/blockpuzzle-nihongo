@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nihongo Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+      <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center min-h-screen p-4">
+    <div class="text-center max-w-4xl w-full">
+        <h1 class="text-4xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+            Welcome to Puzzle Nihongo!
+        </h1>
+        <p class="text-lg text-gray-600">Bermain menyusun kalimat menjadi padu</p>
+         <div id="level-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 py-20"></div>
+
+        <div class="fixed inset-x-0 bottom-0 bg-white z-50 shadow-lg border-t border-gray-200">
+                <div class="flex justify-around">
+                    <!-- Home Nav -->
+                    <a href="/" class="flex flex-col items-center py-3 px-6 text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    <span class="text-xs mt-1">Home</span>
+                    </a>
+                    
+                    <!-- info nav -->
+                    <a href="/info" class="flex flex-col items-center py-3 px-6 text-gray-500 hover:text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    <span class="text-xs mt-1">Statistik</span>
+                    </a>
+                    <!-- tutor nav -->
+                     <a href="#" id="how-to-play-btn" class="flex flex-col items-center py-3 px-6 text-gray-500 hover:text-blue-600">
+                   <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                    </svg>
+
+                    <span class="text-xs mt-1">Tutorial</span>
+                    </a>
+                </div>
+        </div>
+    </div>
+     <script>
+        // --- TAMBAHKAN SCRIPT UNTUK MEMUAT LEVEL DARI FIREBASE ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyBmTt3egck8X7fBtN4efqqnaExp0aZzV1I",
+                authDomain: "yuii-database.firebaseapp.com",
+                databaseURL: "https://yuii-database-default-rtdb.firebaseio.com",
+                projectId: "yuii-database",
+                storageBucket: "yuii-database.appspot.com",
+                messagingSenderId: "981101790733",
+                appId: "1:981101790733:web:03017e8c35c8edb40c3744"
+            };
+
+            firebase.initializeApp(firebaseConfig);
+            const database = firebase.database();
+            const quizRef = database.ref('quiz');
+            const levelContainer = document.getElementById('level-container');
+            const loadingText = document.getElementById('loading-levels');
+
+            quizRef.orderByChild('number').once('value', snapshot => {
+                if (snapshot.exists()) {
+                    levelContainer.innerHTML = ''; // Kosongkan container
+                    const levels = snapshot.val();
+                    Object.entries(levels).forEach(([key, value]) => {
+                        const levelCard = `
+                            <a href="/quiz?level=${key}" class="group relative overflow-hidden level-card bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+                                <div class="absolute inset-0 bg-gradient-to-br from-blue-100 to-purple-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div class="relative z-10 p-8">
+                                    <div class="w-20 h-20 mb-6 mx-auto flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-3xl font-bold shadow-md">
+                                        ${String(value.number || '0').padStart(2, '0')}
+                                    </div>
+                                    <h2 class="text-2xl font-bold text-gray-800 mb-2">${value.title || 'Tanpa Judul'}</h2>
+                                </div>
+                                <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </a>
+                        `;
+                        levelContainer.innerHTML += levelCard;
+                    });
+                } else {
+                    loadingText.textContent = 'Belum ada level yang tersedia.';
+                }
+            }).catch(error => {
+                loadingText.textContent = 'Gagal memuat level.';
+                console.error(error);
+            });
+        });
+        // --- AKHIR SCRIPT ---
+        
+        function showHowToPlay() {
+            // ... (kode modal tutorial Anda tidak berubah)
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+                    <div class="flex justify-between items-center border-b p-4">
+                        <h2 class="text-xl font-bold text-gray-800">Cara Bermain Kuis</h2>
+                        <button id="close-modal" class="text-gray-500 hover:text-gray-700">&times;</button>
+                    </div>
+                    <div class="p-6 overflow-y-auto">
+                        <!-- Konten tutorial Anda di sini -->
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.querySelector('#close-modal').addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+        }
+
+        const howToPlayBtn = document.getElementById('how-to-play-btn');
+        if (howToPlayBtn) {
+            howToPlayBtn.addEventListener('click', showHowToPlay);
+        }
+    </script>
+   
+</body>
+</html>

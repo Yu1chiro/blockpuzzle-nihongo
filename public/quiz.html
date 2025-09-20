@@ -883,7 +883,7 @@
             // === Event Listeners ===
             clueBtn.addEventListener('click', () => {
                 if (isGameOver) return;
-                const question = quizData[`level${currentLevel}`][currentQuestionIndex];
+              const question = quizData[currentQuestionIndex]; 
                 Swal.fire({
                     title: 'Petunjuk',
                     text: question.clue,
